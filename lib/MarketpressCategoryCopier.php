@@ -257,7 +257,7 @@ class MarketpressCategoryCopier {
 
 	    // if skip check box is checked, skip it
 	    if(isset($_POST['skip_existing'])){
-		return false;
+		return $category->term_id; // Return the ID of the category on the origin site, so that it is added to categories copied (or processed)
 	    }
 	    
 	    // Check if update category checkbox is checked, and update it accordingly
@@ -268,9 +268,9 @@ class MarketpressCategoryCopier {
 		    'description' => $category->description);
 		
 		// update product category name and description
-		$result = wp_update_term($term->term_id, 'product_category', $args);
+		wp_update_term($term->term_id, 'product_category', $args);
 		
-		return $result->term_id; // Return the updated term ID
+		return $category->term_id; // Return the ID of the category on the origin site, so that it is added to categories copies
 	    }
 
 	    // Do not skip, copy
