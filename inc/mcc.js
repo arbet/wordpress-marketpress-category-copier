@@ -11,10 +11,7 @@ jQuery(document).ready(function($) {
     jQuery(".select_chosen").chosen({width: "25%"});
     
     // Get sites by theme
-    get_marketpress_sites();    
-    
-    // Get menu locations
-    get_menu_locations();    
+    get_marketpress_sites();          
     
     // Add onclick event for skip existing checkbox
     jQuery("#skip_existing").click(enable_name_checkbox);
@@ -27,9 +24,22 @@ jQuery(document).ready(function($) {
             
             // Get sites which have the active theme
             get_marketpress_sites();
+    });
+    
+    // Update description when skip category action is changed
+    jQuery("#category_exists").chosen().change(function(){
+        
+            // Get current value of select box
+            value = jQuery( "#category_exists" ).val();
             
-            // Get menu locations
-            get_menu_locations();
+            //Hide all descriptions and option settings
+            jQuery('.category_exists_description').hide();            
+            jQuery('.category_exists_settings').hide();            
+            
+            // Show proper description
+            jQuery('#' + value + '_description').show();
+            jQuery('#' + value + '_settings').show();
+            
     });
 
 function get_marketpress_categories(){
@@ -41,23 +51,12 @@ function get_marketpress_categories(){
                 'blog_id': jQuery( "#origin_site" ).val(),
         };            
         
-       // console.log('Blog ID is ' + data.blog_id)
+
     // Get ajax value
     jQuery.post(ajaxurl, data, function(response) {
         
-      console.log(response);
-        //var menus = JSON.parse(response);
-       // console.log(menus);
-        // Empty existing values
-        $('#origin_categories').replaceWith(response);
-
-        // Loop through all of the select fields
-        /*$.each(menus, function(key, value) { 
-            // Replace select boxes
-            $("#origin_categories").append($("<option></option>").attr("value",value.term_id).text(value.name)); 
-        });*/
-        
-        // Change to multiple select box
+    // Empty existing values
+    $('#origin_categories').replaceWith(response);
        
     // Change to multiple select box
     $("#origin_categories").attr("multiple",  "multiple" );
@@ -85,7 +84,7 @@ function get_marketpress_sites(){
     jQuery.post(ajaxurl, data, function(response) {
 
         var sites = JSON.parse(response);
-        //console.log(sites);
+
         // Empty existing values
         $('#destination_sites').empty();
 

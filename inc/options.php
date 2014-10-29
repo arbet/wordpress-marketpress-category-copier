@@ -30,49 +30,84 @@ $sites = wp_get_sites();
 ?>
 <table class="form-table">
         <tr valign="top">
-        <th scope="row">Site to copy Marketpress product categories from*</th>
+        <th scope="row">Origin Site*</th>
         <td><select name='origin_site' id='origin_site' class='select_chosen'>
 <?php    foreach($sites as $key=>$site){
 	echo "<option value='".$site['blog_id']."'>".$site['domain']."</option>";
     }
 ?>
 	    </select>
+	    <p class="description">
+		Site to copy Marketpress product categories from
+	    </p>	    
 	</td>
         </tr>
         <tr valign="top">
-        <th scope="row">Marketpress product categories to be copied*</th>
+        <th scope="row">Categories to be copied*</th>
         <td><select name='origin_categories[]' id='origin_categories' style="display:none" multiple>
 	    </select>
 	    <p class="description">Lists all product categories on the site you're copying from. If you select a child category, its ancestors will be automatically copied.</p>
 	</td>
         </tr>	
         <tr valign="top">
-        <th scope="row">Sites to copy Marketpress product categories to*</th>
+        <th scope="row">Destination Sites*</th>
         <td><select name='destination_sites[]' id="destination_sites" multiple class='select_chosen'> 
 	    </select>
 	    <p class="description">
-		Only sites that have Marketpress currently active will be displayed here. If you have network activated this plugin it should list all of your websites here.
+		Sites you're copying Marketpress categories to. Only sites that have Marketpress currently active will be displayed here.
 	    </p>	    
 	</td>
         </tr>	
-	<tr valign="top">
-        <th scope="row">Skip Existing Categories?</th>
-        <td><input type='checkbox' name='skip_existing' id="skip_existing" value='' checked/>
+
+        <tr valign="top">
+        <th scope="row">An existing category has:*</th>
+        <td><select name='duplicate_category[]' id="duplicate_category" class='select_chosen' multiple> 
+		<option value='slug' selected>Same slug</option>		
+	    <option value='name'>Same name</option>				
+	    </select>
 	    <p class="description">
-		If this is checked, any categories which have the same slug will be skipped. If unchecked, they will be added with the name "Category X (Copy) " , where Category X is the name of the original category.
-	    </p>
+		Please select how to determine if a category already exists on a destination site or not. If more than one option is selected, it will check for all, i.e. duplicate slug AND duplicate name.
+	    </p>	    	    	    
+	</td>
+        </tr>		
+	
+        <tr valign="top">
+        <th scope="row">If category exists on destination site*</th>
+        <td><select name='category_exists' id="category_exists" class='select_chosen'> 
+	    <option value='skip' selected>Skip Category</option>		
+	    <option value='duplicate'>Duplicate Category</option>		
+	    <option value='update'>Update Category</option>		
+	    </select>
+	    <p class="description category_exists_description" id='skip_description'>
+		Existing categories will be skipped. Categories on destination sites will be left intact.
+	    </p>	    
+	    <p class="description category_exists_description" id='duplicate_description' style='display:none'>
+		Existing categories will be copied and <strong>(Copy)</strong> will be appended to the category name.
+	    </p>	    	    
+	    <p class="description category_exists_description" id='update_description' style='display:none'>
+		Category , slug name and description will be updated to reflect the ones on the origin site. 
+	    </p>	    	    
 	</td>
         </tr>	
-	<tr valign="top">
-        <th scope="row">Update category details for identical slugs?</th>
-        <td><input type='checkbox' name='update_details' value='' id="update_details" disabled/>
+    <tbody id="skip_settings"  class ='category_exists_settings'>
+        <tr valign="top">
+        <th scope="row"></th>
+        <td><input type="checkbox" name="skip_children" value=""/> Skip Children
 	    <p class="description">
-		If checked, when two categories with the same slug are found, the name and description of the destination slug is updated to match the name of the origin slug. If this is unchecked, it will create copies of the original categories.<br/><br/>
-		Example: Origin site has Category1: Category1Name, category-slug-x, Description1 and Destination site has Category2: Category2Name, category-slug-x, Description2. The name and description of Category2 are replaced by Category1's name and description
-		    
-	    </p>
+		If checked, children of skipped categories will be skipped as well.
+	    </p>	    
+	    <p class="description category_exists_description" id='duplicate_description' style='display:none'>
+		Existing categories will be copied and <strong>(Copy)</strong> will be appended to the category name.
+	    </p>	    	    
+	    <p class="description category_exists_description" id='update_description' style='display:none'>
+		Category name and category description will be updated to reflect the ones on the origin site. 
+	    </p>	    	    
 	</td>
         </tr>	
+    </tbody>
+    <tbody id="duplicate_settings" class ='category_exists_settings' style="display:none"><!-- Stores settings for Duplicate Category option--></tbody>
+    <tbody id="update_settings" class ='category_exists_settings' style="display:none"><!-- Stores settings for Update Category option--></tbody>
+	
 </table> 
     
 <?php
