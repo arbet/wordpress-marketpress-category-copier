@@ -14,7 +14,10 @@ jQuery(document).ready(function($) {
     get_marketpress_sites();    
     
     // Get menu locations
-    get_menu_locations();
+    get_menu_locations();    
+    
+    // Add onclick event for skip existing checkbox
+    jQuery("#skip_existing").click(enable_name_checkbox);
     
     // When the site field is changed, we need to get the list of menus available to that site
     jQuery("#origin_site").chosen().change(function(){
@@ -140,7 +143,18 @@ function get_menu_locations(){
     
 }
 
-
+// Enables or disables update name checkbox based on the value of Skip Existing
+function enable_name_checkbox() {
+  if (this.checked) {
+    // disable and uncheck when skip existing is checked
+    jQuery("#update_details").attr("disabled", true); 
+    jQuery('#update_details').attr('checked', false);
+  } else {
+      
+    // Enable when skip existing is unchecked
+    jQuery("#update_details").removeAttr("disabled");
+  }
+}
  
     
 });
