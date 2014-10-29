@@ -67,7 +67,7 @@ $sites = wp_get_sites();
         <th scope="row">Update category details for identical slugs?</th>
         <td><input type='checkbox' name='update_details' value='' id="update_details" disabled/>
 	    <p class="description">
-		If checked, when two categories with the same slug are found, the name and description of the destination slug is updated to match the name of the origin slug. If this is unchecked, it will <br/><br/>
+		If checked, when two categories with the same slug are found, the name and description of the destination slug is updated to match the name of the origin slug. If this is unchecked, it will create copies of the original categories.<br/><br/>
 		Example: Origin site has Category1: Category1Name, category-slug-x, Description1 and Destination site has Category2: Category2Name, category-slug-x, Description2. The name and description of Category2 are replaced by Category1's name and description
 		    
 	    </p>

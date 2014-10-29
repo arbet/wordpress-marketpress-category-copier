@@ -34,3 +34,6 @@ define( 'MCC_URL', plugin_dir_url(__FILE__));
 
 // Require NetworkCopier class
 require_once (MCC_PATH.'/lib/MarketpressCategoryCopier.php'); 
+
+// Require Walker class - needed to properly copy parent-child categories
+require_once (MCC_PATH.'/lib/MarketpressCategoryWalker.php');

@@ -2,9 +2,13 @@
 
 class MarketpressCategoryCopier {
 
-    var $categories_to_copy; // Categories still to be copied for a certain site
-    var $categories_copied; // Categories that are being copied
-    var $origin_categories; // List of categories to be copied for each site
+    // Categories still to be copied for a certain site - This is required because we have an array of objects, we need to clone the original categories into this object
+    var $categories_to_copy; 
+    
+    // Original List of categories to be copied for each site    
+    var $origin_categories; 
+    
+    // Class Constructor
     public function __construct() {
 
 	 // Add menu item to network admin page
@@ -42,7 +46,6 @@ class MarketpressCategoryCopier {
 	// Add action for ajax requests from option page
 	add_action('wp_ajax_mcc_get_marketpress_categories', array($this, 'get_marketpress_product_categories'));	
 	add_action('wp_ajax_mcc_get_marketpress_sites', array($this, 'get_marketpress_sites'));
-	add_action('wp_ajax_mcc_get_menu_locations', array($this, 'get_menu_locations'));
     }
     
 /**
@@ -123,27 +126,6 @@ class MarketpressCategoryCopier {
 	die();	
     }
     
-    public function get_menu_locations(){	
-
-	// Switch to posted blog ID
-	switch_to_blog(intval( $_POST['blog_id'] ));
-
-
-	// Get theme mods option to get menu locations - 
-	// get_registered_nav_menus not working with switch_to_blog since it uses global variables
-	// More information: http://scotty-t.com/2012/03/13/switch_to_blog-is-an-unfunny-nightmare/
-
-	// Get registered menu locations
-	$theme_options = get_option('theme_mods_'. get_stylesheet());
-
-	$theme_menu_locations = $theme_options['nav_menu_locations'];
-	
-	echo json_encode($theme_menu_locations);
-	
-	restore_current_blog();	
-	die();		
-    }
-    
     // Copies the categories from origin site to destination sites
     public function copy_categories(){
 	
@@ -176,23 +158,11 @@ class MarketpressCategoryCopier {
 		$this->categories_to_copy[$key2] = clone $cat2;
 	    }
 	    
-	    // Initialize copied categories array
-	    $this->categories_copied = array();
+	    // Initialize walker class
+	    $walker = new MarketpressCategoryWalker();
 	    
-	    // Copy top level categories
-	    $this->copy_children_categories(0);
-
-	    // Copy categories with no parent, and add them to an array
-	    while(!empty($this->categories_to_copy)){		
-
-		// Keep passing through the array until all of the items have been copied
-		foreach($this->categories_to_copy as $key=>$cat_to_copy){
-		    
-		    $this->copy_children_categories($cat_to_copy->parent);
-		}
-		
-		//// First level children should be already copied
-	    } // End of while loop
+	    // Walk through tree
+	    $walker->walk($this->categories_to_copy,0);
 	    
 	    restore_current_blog();
 	    
@@ -244,105 +214,6 @@ class MarketpressCategoryCopier {
 		<?php
 		
 	    return true;
-	}
-    }
-    
-    private function copy_category($category, $new_parent){
-
-	// Check if category already exists in the system
-	$term = get_term_by('slug', $category->slug, 'product_category');
-
-	// Category exists
-	if($term !== FALSE){
-
-	    // if skip check box is checked, skip it
-	    if(isset($_POST['skip_existing'])){
-		return $category->term_id; // Return the ID of the category on the origin site, so that it is added to categories copied (or processed)
-	    }
-	    
-	    // Check if update category checkbox is checked, and update it accordingly
-	    if(isset($_POST['update_details'])){	
-		
-		$args = array(
-		    'name' => $category->name,
-		    'description' => $category->description);
-		
-		// update product category name and description
-		wp_update_term($term->term_id, 'product_category', $args);
-		
-		return $category->term_id; // Return the ID of the category on the origin site, so that it is added to categories copies
-	    }
-
-	    // Do not skip, copy
-	    $args = array('cat_name'=>$category->name.' (Copy)',
-			  'category_description' => $category->description,
-			'slug' => $category->slug.'-copy-'.rand(1,1000), // Needed to ensure that it does not conflict with a previously copied category
-			'taxonomy' => 'product_category',
-			'category_parent' => $new_parent);
-
-	    return wp_insert_category($args); // Pass the created category ID
-
-	}
-
-	// category does not exist
-	else {
-
-	    // Do not skip, copy
-	    $args = array('cat_name'=>$category->name,
-			  'category_description' => $category->description,
-			'slug' => $category->slug,
-			'taxonomy' => 'product_category',
-			'category_parent' => $new_parent);
-
-	    return wp_insert_category($args); // Pass the created category ID		    
-
-	}
-    }
-    
-    // Copies the children categories of a parent
-    // Takes an array of categories to be copied and categories copied (both by reference)
-    // and a parent ID, 0 means top level
-    private function copy_children_categories($parent){
-	
-	// Copy each of the categories individually
-	foreach($this->categories_to_copy as $key=>$category){
-	    
-	    // Check if the parent has been already copied, if not skip for non-top level categories
-	    //echo 'category ID is '.$category->term_id."<br/>";
-	    //echo 'Parent ID is '.$category->parent."<br/>";
-	    //echo "Passed parent parameter is ".$parent."<br/>";
-	    //echo "<br/>";
-	    if( ($category->parent != 0) && (!in_array($parent, $this->categories_copied) ) ){
-		//echo "Category skipped because parent category has not been copied<br/>";
-		continue;
-	    }
-	    
-	    // Copy only nodes that are direct children of our parent
-	    if ( $category->parent != $parent){
-		//echo "Category skipped because it has a different parent<br/>";
-		continue;
-	    }
-
-	    // Copy category
-	    $new_cat_id = $this->copy_category($category, $parent);
-	    
-	    // Unset in categories to copy
-	    unset($this->categories_to_copy[$key]);
-	    
-	    // Add to copied categories
-	    $this->categories_copied[] = $new_cat_id;
-	    
-	    // Update the parent IDs in array to be copied to reflect the newly inserted ones
-	    foreach($this->categories_to_copy as $key => $cat){
-		
-		// The category parent ID is the same as the category of the ID just updated
-		if($cat->parent == $category->term_id){
-		    
-		    // Change the parent ID of the category to be copied
-		    $this->categories_to_copy[$key]->parent = $new_cat_id;
-		}
-	    }
-	    
 	}
     }
     

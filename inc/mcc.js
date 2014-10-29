@@ -102,47 +102,6 @@ function get_marketpress_sites(){
     
 }
 
-// Displays the menu locations for the active site's theme
-function get_menu_locations(){
-    
-        // Create post data
-        var data = {
-                'action': 'mcc_get_menu_locations',
-                'blog_id': jQuery( "#origin_site" ).val(),
-        };            
-        
-    // Get ajax value
-    jQuery.post(ajaxurl, data, function(response) {
-        
-        
-        console.log(response);
-
-        // Empty existing values
-        $('#menu_location').empty();
-        
-        // If response is null, return
-        if(response ==  'null'){
-            // Rebuild chosen select boxes
-            $("#menu_location").trigger("chosen:updated");
-            
-            return;
-        }
-
-        var menus = JSON.parse(response);
-        
-        // Loop through all of the select fields
-        $.each(menus, function(key, value) { 
-            
-            // Replace select boxes
-            $("#menu_location").append($("<option></option>").attr("value",key).text(key)); 
-        });
-        
-        // Rebuild chosen select boxes
-        $("#menu_location").trigger("chosen:updated");
-    });   
-    
-}
-
 // Enables or disables update name checkbox based on the value of Skip Existing
 function enable_name_checkbox() {
   if (this.checked) {
