@@ -249,12 +249,13 @@ class MarketpressCategoryCopier {
     
     private function copy_category($category, $new_parent){
 
-	//echo "New Parent is".$new_parent."<br/>";
+	// TODO: Change term_exists to get term by slug, which is more accuratte: http://codex.wordpress.org/Function_Reference/get_term_by
 	// Check if category already exists in the system
-	$term = term_exists($category->name, 'product_category');
+	$term = get_term_by('slug', $category->slug, 'product_category');
+	//$term = term_exists($category->name, 'product_category');
 
 	// Category exists
-	if($term !== 0 && $term !==null){
+	if($term !== FALSE){
 
 	    // if skip check box is checked, skip it
 	    if(isset($_POST['skip_existing'])){
