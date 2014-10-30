@@ -45,14 +45,14 @@ $sites = wp_get_sites();
         <tr valign="top">
         <th scope="row">Categories to be copied*</th>
         <td id='origin_cat_cell'><select name='origin_categories[]' id='origin_categories' class='select_chosen' style="display:none" multiple>
-	    </select>
+	    </select>  <button id='all_categories' class='ui_button'>Add All</button> <button id='reset_categories' class='ui_button'>Clear</button>
 	    <p class="description">Lists all product categories on the site you're copying from. If you select a child category, its ancestors will be automatically copied.</p>
 	</td>
         </tr>	
         <tr valign="top">
         <th scope="row">Destination Sites*</th>
         <td><select name='destination_sites[]' id="destination_sites" multiple class='select_chosen'> 
-	    </select>
+	    </select> <button id='all_sites' class='ui_button'>Add All</button> <button id='reset_sites' class='ui_button'>Clear</button>
 	    <p class="description">
 		Sites you're copying Marketpress categories to. Only sites that have Marketpress currently active will be displayed here.
 	    </p>	    

@@ -11,7 +11,10 @@ jQuery(document).ready(function() {
     get_marketpress_categories();
     
     // Get sites by theme
-    get_marketpress_sites();          
+    get_marketpress_sites();  
+    
+    // Activate reset and add all buttons
+    activate_buttons();
     
     // Add onclick event for skip existing checkbox
     jQuery("#skip_existing").click(enable_name_checkbox);
@@ -64,7 +67,6 @@ function get_marketpress_categories(){
     // Loop through all of the select fields
     jQuery.each(response, function(i, el) { 
 
-console.log(el);
         jQuery('#origin_categories').append(el);
     });
 
@@ -124,5 +126,56 @@ function enable_name_checkbox() {
   }
 }
  
+function activate_buttons(){
     
+    // Event for add all categories
+    jQuery('#all_categories').click(function(){
+        
+        // Select all categories
+        jQuery("#origin_categories option").prop('selected', true); 
+        
+        // Rebuild chosen select boxes
+        jQuery("#origin_categories").trigger("chosen:updated");        
+        
+        return false;
+    });
+    
+    // Event for add all categories
+    jQuery('#reset_categories').click(function(){
+        
+        // Select all categories
+        jQuery("#origin_categories option").prop('selected', false); 
+        
+        // Rebuild chosen select boxes
+        jQuery("#origin_categories").trigger("chosen:updated");        
+        
+        return false;
+    });    
+    
+    // Event for add all categories
+    jQuery('#all_sites').click(function(){
+        
+        // Select all categories
+        jQuery("#destination_sites option").prop('selected', true); 
+        
+        // Rebuild chosen select boxes
+        jQuery("#destination_sites").trigger("chosen:updated");        
+        
+        return false;
+    });
+    
+    // Event for add all categories
+    jQuery('#reset_sites').click(function(){
+        
+        // Select all categories
+        jQuery("#destination_sites option").prop('selected', false); 
+        
+        // Rebuild chosen select boxes
+        jQuery("#destination_sites").trigger("chosen:updated");        
+        
+        return false;
+    });      
+}
+
 });
+
