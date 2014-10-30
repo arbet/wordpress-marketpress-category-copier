@@ -14,7 +14,7 @@ foreach($activity_log as $site_id => $site_log){
     
     // The log for this site is empty, skip it
     if(empty($site_log)){
-	return;
+	continue;
     }
     
     // Log is not empty, switch flag
@@ -29,14 +29,21 @@ foreach($activity_log as $site_id => $site_log){
     // Loop through individual logs
     foreach($site_log as $key=>$entry){
 	
+	
 	$destination_node = $entry['destination_node'];
 	
-	echo "<a href='".$current_site->siteurl."/wp-admin/edit-tags.php?action=edit&taxonomy=product_category&tag_ID=".$destination_node->term_id."&post_type=product'>".$destination_node->name."</a> has been ".$entry['action']."<br/>";
+	echo "<a href='".$current_site->siteurl."/wp-admin/edit-tags.php?action=edit&taxonomy=product_category&tag_ID=".$destination_node->term_id."&post_type=product'>".$destination_node->name."</a> has been ".$entry['action'];
+	
+	// Echo error if it exists
+	if(isset($entry['error'])){
+	    echo "<span style='color: #FF0000'> Error: ".$entry['error']->get_error_message()."</span>";
+	}
+	echo "<br/>";
     }
 }
 
 if($is_log_empty){
-    echo "<p>Log is empty</p>";
+    echo "<p>Log is empty. All categories have been copied without any categories being skipped, updated or duplicated.</p>";
 }
 
 ?>

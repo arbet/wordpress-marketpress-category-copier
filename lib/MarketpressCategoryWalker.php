@@ -63,6 +63,11 @@ class MarketpressCategoryWalker extends Walker {
 	    // Update category option is selected
 	    elseif($_POST['category_exists'] == 'update'){	
 		
+		// Check if there are any changes to be implemented, if not return (We don't want to log item as updated if no change has been implemented, this is why the check is here
+		if( ($term->name == $category->name) && ($term->description == $category->description) && ($term->slug == $category->slug)){
+		    return;
+		}
+		
 		$args = array(
 		    'name' => $category->name,
 		    'description' => $category->description,
@@ -81,7 +86,7 @@ class MarketpressCategoryWalker extends Walker {
 	    }
 
 	    // Copy category option is selected
-	    elseif($_POST['category_exists'] == 'copy'){
+	    elseif($_POST['category_exists'] == 'duplicate'){
 		
 	    	    
 		// Do not skip, copy
@@ -110,13 +115,22 @@ class MarketpressCategoryWalker extends Walker {
 			  'category_description' => $category->description,
 			'slug' => $category->slug,
 			'taxonomy' => 'product_category',
+			'category_nicename' => $category->slug,
 			'category_parent' => $this->parent_id);
 
 	    // Set parent ID to created category
-	    $this->parent_id = wp_insert_category($args); 
+	    $insert_id = wp_insert_category($args, 1); 
 	    
-	    // Add that node was added to activity log
-	    //$this->activity_log[] = array('origin_node' => $category, 'destination_node' => $term, 'action' =>'added');	
+	    // Error has occurred during copy
+	    if(is_wp_error($this->parent_id)){
+		$this->activity_log[] = array('origin_node' => $category, 'destination_node' => $term, 'action' =>'added', 'error' => $insert_id);	
+		
+	    }
+	    
+	    // No errors, set parent ID to newly created element
+	    else{
+		$this->parent_id = $insert_id;
+	    }
 	    
 	    return;
 
