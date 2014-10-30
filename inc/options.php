@@ -13,7 +13,7 @@ if(!empty($_POST)){
 
 <div class="wrap">
 <h2>Bulk Marketpress Product Category Copier</h2>
-
+<p><a href='settings.php?page=marketpress_category_copier_log'>View Activity Log of Last Run</a></p>
 <form method="post" action="settings.php?page=marketpress_category_copier"> 
 
 <?php 
@@ -44,7 +44,7 @@ $sites = wp_get_sites();
         </tr>
         <tr valign="top">
         <th scope="row">Categories to be copied*</th>
-        <td><select name='origin_categories[]' id='origin_categories' style="display:none" multiple>
+        <td id='origin_cat_cell'><select name='origin_categories[]' id='origin_categories' class='select_chosen' style="display:none" multiple>
 	    </select>
 	    <p class="description">Lists all product categories on the site you're copying from. If you select a child category, its ancestors will be automatically copied.</p>
 	</td>

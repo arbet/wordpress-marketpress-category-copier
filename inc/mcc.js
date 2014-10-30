@@ -2,13 +2,13 @@
  * Custom JS code for NMC
 */
 
-jQuery(document).ready(function($) {
-    
-    // Get site menus on page load
-    get_marketpress_categories();
+jQuery(document).ready(function() {    
 
     // Make beautiful select boxes
     jQuery(".select_chosen").chosen({width: "25%"});
+    
+    // Get site menus on page load
+    get_marketpress_categories();
     
     // Get sites by theme
     get_marketpress_sites();          
@@ -53,19 +53,29 @@ function get_marketpress_categories(){
         
 
     // Get ajax value
-    jQuery.post(ajaxurl, data, function(response) {
+    jQuery.post(ajaxurl, data, function(response) {        
+    
+    // Parse html to insert options
+    response = jQuery(jQuery.parseHTML( response)).find('option');;    
         
     // Empty existing values
-    $('#origin_categories').replaceWith(response);
-       
-    // Change to multiple select box
-    $("#origin_categories").attr("multiple",  "multiple" );
-    
-    // Change to none selected
-    $("#origin_categories option").prop("selected", false);
+    jQuery('#origin_categories').empty();
 
-    // Switch to chosen box
-    $("#origin_categories").chosen({width: "25%"});
+    // Loop through all of the select fields
+    jQuery.each(response, function(i, el) { 
+
+console.log(el);
+        jQuery('#origin_categories').append(el);
+    });
+
+    // Deselect all options
+    jQuery("#origin_categories:selected").removeAttr("selected");    
+    jQuery("#origin_categories").prop("selectedIndex", -1); // Removes default select option
+    
+    // Rebuild chosen select boxes
+    jQuery("#origin_categories").trigger("chosen:updated");
+    
+    return;
     
     });   
         
@@ -86,17 +96,17 @@ function get_marketpress_sites(){
         var sites = JSON.parse(response);
 
         // Empty existing values
-        $('#destination_sites').empty();
+        jQuery('#destination_sites').empty();
 
         // Loop through all of the select fields
-        $.each(sites, function(key, value) { 
+        jQuery.each(sites, function(key, value) { 
 
             // Replace select boxes
-            $("#destination_sites").append($("<option></option>").attr("value",value.blog_id).text(value.domain)); 
+            jQuery("#destination_sites").append(jQuery("<option></option>").attr("value",value.blog_id).text(value.domain)); 
         });
         
         // Rebuild chosen select boxes
-        $("#destination_sites").trigger("chosen:updated");
+        jQuery("#destination_sites").trigger("chosen:updated");
     });   
     
 }

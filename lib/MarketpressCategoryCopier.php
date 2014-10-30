@@ -8,12 +8,18 @@ class MarketpressCategoryCopier {
     // Original List of categories to be copied for each site    
     var $origin_categories; 
     
+    // Stores the activity log for all of the websites
+    var $combined_activity_log = array();
+    
     // Class Constructor
     public function __construct() {
 
 	 // Add menu item to network admin page
 	 add_action('network_admin_menu', array($this, 'add_network_menus'));
-	 add_action( 'admin_init', array($this, 'register_settings' ));	 
+	 add_action( 'admin_init', array($this, 'register_settings' ));	
+	 
+	 // Add option to store activity logs, does nothing if it already exists
+	 add_option('mcc_activity_log', '', '', 'no');
     }
     
 /**
@@ -22,8 +28,12 @@ class MarketpressCategoryCopier {
  * <p>This function creates the menu links under the network administrator pages</p>
  */
     public function add_network_menus() {
-         
+        
+	// Add page to menu
 	$page_hook_suffix = add_submenu_page( 'settings.php', 'Marketpress Product Category Copier', 'Marketpress Category Copier', 'manage_network_options', 'marketpress_category_copier', array($this, 'display_options_page') );
+	
+	// Add activity log page without specifying a menu parent
+	add_submenu_page( NULL, 'Marketpress Category Copier Activity Log', 'Marketpress Category Copier Activity Log', 'manage_network_options', 'marketpress_category_copier_log', array($this, 'display_activity_log') );
 	
 	add_action('admin_print_scripts-' . $page_hook_suffix, array($this, 'initialize_admin_scripts'));
 
@@ -164,9 +174,15 @@ class MarketpressCategoryCopier {
 	    // Walk through tree
 	    $walker->walk($this->categories_to_copy,0);
 	    
+	    // Add current site activity log to combined activity log
+	    $this->combined_activity_log[$site_id] = $walker->activity_log;
+	    
 	    restore_current_blog();
 	    
 	} // All sites looped through
+	
+	// Store completed activity log in our database
+	update_option('mcc_activity_log', $this->combined_activity_log);
 	
     }
     
@@ -267,6 +283,12 @@ class MarketpressCategoryCopier {
 	// Switch to posted blog ID
 	switch_to_blog(intval( $origin_site ));
     }
+    
+    // Displays the latest activity log
+    public function display_activity_log(){
+	require (MCC_PATH.'/inc/log.php'); 
+    }
+    
 }
 
 $networkcopier = new MarketpressCategoryCopier();
