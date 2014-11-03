@@ -3,7 +3,7 @@
  * Plugin Name: Marketpress Product Category Copier
  * Plugin URI: http://thoughtengineer.com/
  * Description:  Bulk copies Marketpress product categories form one sub site to one or more other subsites on the same network installation.
- * Version: 1.1
+ * Version: 1.2
  * Author: Samer Bechara
  * Author URI: http://thoughtengineer.com/
  * Text Domain: marketpress-category-copier
