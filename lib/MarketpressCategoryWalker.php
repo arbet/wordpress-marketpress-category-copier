@@ -15,8 +15,11 @@ class MarketpressCategoryWalker extends Walker {
      */
     public $db_fields = array( 'parent' => 'parent', 'id' => 'term_id' );
     
-    // The ID of the parent just copied - defaults as top level
-    public $parent_id = 0;  
+    // An array of the node parents and grandparents
+    public $node_parents = array();
+    
+    // The ID of the record just inserted, defaults to null
+    public $inserted_id = 0;  
     
     // Stores the result of the whole run
     public $activity_log = array();
@@ -34,13 +37,20 @@ class MarketpressCategoryWalker extends Walker {
      * @param string $output Passed by reference. Used to append additional content.
      * @param int    $item  Name of the item
      * @param array  $args   An array of arguments.
-     *	    'parent_id' - The parent ID of the current node
+     *	    'inserted_id' - The ID of the last inserted node
      */
     public function start_el(&$output, $category, $depth = 0, $function_args = array()){
 	
-	// If this is a top level element, unset the parent set to the previous node
-	if($depth == 0){
-	    $this->parent_id = 0;
+	// Set parent ID based on our depth
+	if($depth != 0){
+
+	    // Set parent ID to the last parent in our parents array for non-top level elements
+	    $parent_id = end(array_values($this->node_parents));				    
+	}
+
+	// This is a top level element, parent ID is none
+	else{
+	    $parent_id = 0;
 	}
 	
 	// Check if the category already exists
@@ -52,8 +62,8 @@ class MarketpressCategoryWalker extends Walker {
 	    // Skip category option is selected
 	    if($_POST['category_exists'] == 'skip'){
 		
-		// Set parent ID to skipped node
-		$this->parent_id = $term->term_id;
+		// Set inserted ID to skipped node
+		$this->inserted_id = $term->term_id;
 		
 		// Add that node was skipped to activity log
 		$this->activity_log[] = array('origin_node' => $category, 'destination_node' => $term, 'action' =>'skipped');
@@ -76,8 +86,8 @@ class MarketpressCategoryWalker extends Walker {
 		// update product category name and description
 		wp_update_term($term->term_id, 'product_category', $args);
 		
-		// Set parent ID to updated node
-		$this->parent_id = $term->term_id;
+		// Set inserted ID to updated node
+		$this->inserted_id = $term->term_id;
 		
 		// Add that node was updated to activity log
 		$this->activity_log[] = array('origin_node' => $category, 'destination_node' => $term, 'action' =>'updated');
@@ -116,20 +126,20 @@ class MarketpressCategoryWalker extends Walker {
 			'slug' => $category->slug,
 			'taxonomy' => 'product_category',
 			'category_nicename' => $category->slug,
-			'category_parent' => $this->parent_id);
+			'category_parent' => $parent_id);
 
 	    // Set parent ID to created category
 	    $insert_id = wp_insert_category($args, 1); 
 	    
 	    // Error has occurred during copy
-	    if(is_wp_error($this->parent_id)){
+	    if(is_wp_error($this->inserted_id)){
 		$this->activity_log[] = array('origin_node' => $category, 'destination_node' => $term, 'action' =>'added', 'error' => $insert_id);	
 		
 	    }
 	    
 	    // No errors, set parent ID to newly created element
 	    else{
-		$this->parent_id = $insert_id;
+		$this->inserted_id = $insert_id;
 	    }
 	    
 	    return;
@@ -138,6 +148,29 @@ class MarketpressCategoryWalker extends Walker {
 				
 	
     }
+    
+    // When a level starts, add last inserted ID to parents array
+    public function start_lvl( &$output, $depth = 0, $args = array() ) {		
+
+	$this->node_parents[] = $this->inserted_id;
+		
+	return;
+	
+    }
+    
+    // When a level ends, remove the last parent ID from the array
+    public function end_lvl( &$output, $depth = 0, $args = array() ) {
+
+	// Get category data for the last inserted one
+	$category_data = get_term($this->inserted_id, 'product_category');
+
+	// if the parent ID is in the array, pop it
+	if(in_array($category_data->parent, $this->node_parents)){
+	    array_pop($this->node_parents);
+	}
+	
+    }    
+    
     
     private function get_duplicate($category){
 		
