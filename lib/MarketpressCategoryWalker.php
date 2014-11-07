@@ -39,7 +39,7 @@ class MarketpressCategoryWalker extends Walker {
      * @param array  $args   An array of arguments.
      *	    'inserted_id' - The ID of the last inserted node
      */
-    public function start_el(&$output, $category, $depth = 0, $function_args = array()){
+    public function start_el(&$output, $category, $depth = 0, $function_args = array(), $id = 0){
 	
 	// Set parent ID based on our depth
 	if($depth != 0){
